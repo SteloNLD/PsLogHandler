@@ -20,16 +20,16 @@ $SourcePath = "https://github.com/$Author/$Name/archive/master.zip"
 
 $InstalationsFound = 0
 foreach ($ModulePath in $ConfiguredModulePaths) {
-    $Path = Join-Path -Path $Path -ChildPath $Name
+    $Path = Join-Path -Path $ModulePath -ChildPath $Name
+    $InstallPath = $ModulePath
+
     if (Test-Path $Path) {
         $InstalationsFound++
         if ($Path -eq $CurrentPath) {
-            $InstallMode = 2
-            $InstallPath = $Path
+            $InstallMode = 2    
             Break
         }
-    }
-    $InstallPath = $Path
+    }    
 }
 
 if ($InstalationsFound -gt 1) {
@@ -38,7 +38,7 @@ if ($InstalationsFound -gt 1) {
 }
 
 Else {
-    new-item -ItemType Directory -Path $tmpdir
+    new-item $tmpdir -ItemType Directory
     $InstallZip =  Join-Path -Path $tmpdir -ChildPath 'install.zip'
 
     if ($Cred -ne $null) {
@@ -50,21 +50,16 @@ Else {
     }
     
     if ($InstalationsFound -eq 1) {
-        remove-item $InstallPath -Recurse -Force        
+        Remove-Item (Join-Path -Path $InstallPath -ChildPath $Name) -Recurse -Force
     }
 
-    New-Item -Path $InstallPath
-
-    ubzi
-
-
-
-    exit
+    Expand-Archive -Path $InstallZip -DestinationPath $tmpdir
+    Get-Item "$tmpdir\$Name*" | Rename-Item -NewName $Name
+    Move-Item (Join-Path -Path $tmpdir -ChildPath $Name) -Destination $InstallPath
 }
 
 
-Write-Error -Message "$Name encoutered an unknown situation, execution aborted."
-exit
+
 
 
 
