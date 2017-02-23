@@ -57,9 +57,3 @@ Else {
     Get-Item "$tmpdir\$Name*" | Rename-Item -NewName $Name
     Move-Item (Join-Path -Path $tmpdir -ChildPath $Name) -Destination $InstallPath
 }
-
-
-
-
-
-
